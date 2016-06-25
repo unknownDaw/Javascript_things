@@ -1,0 +1,66 @@
+// Download any document and exec the callback function when start download
+function downloadDocument(url: string, callback) {
+
+    var request = new XMLHttpRequest();
+    var timeOut = 25000;
+    //Timeout for request abort
+    var requestTimeout = setTimeout(function () {
+        request.abort();
+    }, timeOut);
+    var filename = "";
+
+    request.open('GET', url, true);
+    request.responseType = 'arraybuffer';
+    request.send(null);
+
+    //event handler for request done
+    request.onreadystatechange = function () {
+        if (request.readyState === 4 && request.status === 200) {
+
+            //Clear timeout
+            clearTimeout(requestTimeout);
+
+            //Obtain data fron header response
+            var disposition = request.getResponseHeader('Content-Disposition');
+            var type = request.getResponseHeader('Content-Type');
+
+            //Obtain the document name
+            if (disposition && disposition.indexOf('attachment') !== -1) {
+                var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                var matches = filenameRegex.exec(disposition);
+                if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+            }
+
+            //Generate a binary large object for download it
+            var blob = new Blob([this.response], { type: type });
+
+            if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                window.navigator.msSaveBlob(blob, filename);
+            } else {
+                var downloadUrl = window.URL.createObjectURL(blob);
+            }
+
+            //Generate a link to download document
+            if (filename) {
+                // use HTML5 a[download] attribute to specify filename
+                var a = document.createElement("a");
+                // if the download attribute dont work
+                if (typeof a.download === 'undefined') {
+                    window.location.href = url;
+                } else {
+                    //Generate anchor element for download file
+                    a.href = downloadUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    //window.URL.revokeObjectURL(downloadUrl);
+                }
+            } else {
+                window.location.href = url;
+            }
+            //Execute the callback function
+            callback.call(null);
+        }
+    };
+}
