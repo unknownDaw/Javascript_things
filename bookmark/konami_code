@@ -1,0 +1,42 @@
+//This bookmark type konami code in your browser
+var ns = (function (ns) {
+    ns.keyPressCustom = function (code) {
+        var keyboardEvent = document.createEvent("KeyboardEvent"),
+            initMethod = typeof keyboardEvent.initKeyboardEvent !== 'undefined' ? "initKeyboardEvent" : "initKeyEvent";
+
+        keyboardEvent[initMethod](
+           "keydown", // event type : keydown, keyup, keypress
+            true,     // bubbles
+            true,     // cancelable  
+            window,   // viewArg: should be window  
+            false,    // ctrlKeyArg  
+            false,    // altKeyArg
+            false,    // shiftKeyArg
+            false,    // metaKeyArg
+            code,       // keyCodeArg : unsigned long the virtual key code, else 0  
+            0         // charCodeArgs : unsigned long the Unicode character associated with the depressed key, else 0
+        );
+        document.dispatchEvent(keyboardEvent);
+    };
+
+    ns.konami_code = function () {
+        var UP = 38,
+            DOWN = 40,
+            LEFT = 37,
+            RIGHT = 39,
+            B_CODE = 66,
+            A_CODE = 65;
+
+        return [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT, B_CODE, A_CODE];
+    };
+
+    ns.dispatchKonami = function () {
+        var code = ns.konami_code();
+        code.forEach( function(keyType) {
+            ns.keyPressCustom(keyType);
+        });
+    };
+    return ns;
+}({}));
+
+ns.dispatchKonami();
