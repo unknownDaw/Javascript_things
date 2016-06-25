@@ -1,0 +1,20 @@
+//Return complement function of other
+function complement(fn) {
+    return function() {
+        return ! fn.apply(this, arguments);
+    };
+}
+
+//Make suffle of an Array
+function shuffle(arrayMix) {
+    return arrayMix.sort(function () {
+        return (Math.floor(Math.random() * 3) - 1);
+    });
+}
+
+//Make a random string with a length
+function randomString(numChar) {
+    return Array(numChar).fill(0).reduce(function (x ,y) {
+        return x + String.fromCharCode(97 + Math.floor(Math.random()*26));
+    }, "").toString();
+}
